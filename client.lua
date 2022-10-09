@@ -537,7 +537,6 @@ RegisterNetEvent('qb-vehicleshop:client:openVehCats', function(data)
                     end
                 end
             elseif QBCore.Shared.Vehicles[k]["shop"] == insideShop then
-                QBCore.Debug('here')
                 vehMenu[#vehMenu + 1] = {
                     header = v.name,
                     txt = Lang:t('menus.veh_price') .. v.price,
