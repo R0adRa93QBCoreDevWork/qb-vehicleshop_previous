@@ -483,11 +483,11 @@ RegisterNetEvent('qb-vehicleshop:client:vehCategories', function()
         if type(QBCore.Shared.Vehicles[k]["shop"]) == 'table' then
             for _, shop in pairs(QBCore.Shared.Vehicles[k]["shop"]) do
                 if shop == insideShop then
-                    catmenu[v.category] = v.categoryLabel
+                    catmenu[v.categoryLabel] = v.categoryLabel
                 end
             end
         elseif QBCore.Shared.Vehicles[k]["shop"] == insideShop then
-                catmenu[v.category] = v.categoryLabel
+            catmenu[v.categoryLabel] = v.categoryLabel
         end
     end
     for k, v in pairs(catmenu) do
@@ -537,6 +537,7 @@ RegisterNetEvent('qb-vehicleshop:client:openVehCats', function(data)
                     end
                 end
             elseif QBCore.Shared.Vehicles[k]["shop"] == insideShop then
+                QBCore.Debug('here')
                 vehMenu[#vehMenu + 1] = {
                     header = v.name,
                     txt = Lang:t('menus.veh_price') .. v.price,
