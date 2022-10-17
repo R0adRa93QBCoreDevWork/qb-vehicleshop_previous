@@ -205,7 +205,7 @@ local function createVehZones(shopName, entity)
 end
 
 -- Zones
-function createFreeUseShop(shopShape, name)
+local function createFreeUseShop(shopShape, name)
     local zone = PolyZone:Create(shopShape, {
         name = name,
         minZ = shopShape.minZ,
@@ -275,7 +275,7 @@ function createFreeUseShop(shopShape, name)
     end)
 end
 
-function createManagedShop(shopShape, name)
+local function createManagedShop(shopShape, name)
     local zone = PolyZone:Create(shopShape, {
         name = name,
         minZ = shopShape.minZ,
@@ -515,6 +515,7 @@ RegisterNetEvent('qb-vehicleshop:client:vehCategories', function()
 end)
 
 RegisterNetEvent('qb-vehicleshop:client:openVehCats', function(data)
+    local key = nil
     local vehMenu = {
         {
             header = Lang:t('menus.goback_header'),
