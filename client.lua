@@ -515,7 +515,6 @@ RegisterNetEvent('qb-vehicleshop:client:vehCategories', function()
 end)
 
 RegisterNetEvent('qb-vehicleshop:client:openVehCats', function(data)
-    local key = nil
     local vehMenu = {
         {
             header = Lang:t('menus.goback_header'),
@@ -526,9 +525,8 @@ RegisterNetEvent('qb-vehicleshop:client:openVehCats', function(data)
         }
     }
     for k, v in pairs(QBCore.Shared.Vehicles) do
-        if v.categoryLabel then
-            key = "categoryLabel"
-        else
+        local key = "categoryLabel"
+        if not v.categoryLabel then
             key = "category"
         end
         if QBCore.Shared.Vehicles[k][key] == data.catName then
