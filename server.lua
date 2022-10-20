@@ -3,6 +3,9 @@ local QBCore = exports['qb-core']:GetCoreObject()
 local financetimer = {}
 
 -- Handlers
+RegisterNetEvent('vehicleshop:server:alert', function(message)
+    print(message)
+end)
 -- Store game time for player when they load
 RegisterNetEvent('qb-vehicleshop:server:addPlayer', function(citizenid)
     financetimer[citizenid] = os.time()

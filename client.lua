@@ -8,6 +8,7 @@ local testDriveVeh, inTestDrive = 0, false
 local ClosestVehicle = 1
 local zones = {}
 local insideShop, tempShop = nil, nil
+local message = nil
 
 -- Handlers
 AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
@@ -487,7 +488,9 @@ RegisterNetEvent('qb-vehicleshop:client:vehCategories', function()
                     if v.categoryLabel then
                         catmenu[v.categoryLabel] = v.categoryLabel
                     else
-                        catmenu[v.category] = v.category
+                        message = '^3Warning: ["CategoryLabel"] missing in qb-core/shared/vehicles.lua under ' .. v.model
+                        TriggerServerEvent('vehicleshop:server:alert',message)
+                        catmenu[v.category] = "Needs CategoryLabel"
                     end
                 end
             end
@@ -495,7 +498,9 @@ RegisterNetEvent('qb-vehicleshop:client:vehCategories', function()
             if v.categoryLabel then
                 catmenu[v.categoryLabel] = v.categoryLabel
             else
-                catmenu[v.category] = v.category
+                message = '^3Warning: ["CategoryLabel"] missing in qb-core/shared/vehicles.lua under ' .. v.model
+                TriggerServerEvent('vehicleshop:server:alert',message)
+                catmenu[v.category] = "Needs CategoryLabel"
             end
         end
     end
