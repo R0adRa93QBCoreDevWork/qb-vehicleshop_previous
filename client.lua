@@ -517,7 +517,7 @@ RegisterNetEvent('qb-vehicleshop:client:vehCategories', function()
                         message = '^3Warning: ["CategoryLabel"] missing in qb-core/shared/vehicles.lua under ^0' .. v.model
                         TriggerServerEvent('vehicleshop:server:alert',message)
                         QBCore.Debug(v.category)
-                        catmenu[v.categoryLabel] = catlist2.cat[v.category]
+                        catmenu[v.categoryLabel] = catlist.cat[v.category]
                     end
                 end
             end
@@ -527,8 +527,8 @@ RegisterNetEvent('qb-vehicleshop:client:vehCategories', function()
             else
                 message = '^3Warning: ["CategoryLabel"] missing in qb-core/shared/vehicles.lua under ^0' .. v.model
                 TriggerServerEvent('vehicleshop:server:alert',message)
-                QBCore.Debug(v.category .. " " .. catlist2[v.category])
-                catmenu[v.categoryLabel] = catlist2[v.category]
+                QBCore.Debug(v.category .. " " .. catlist[v.category])
+                catmenu[v.categoryLabel] = catlist[v.category]
             end
         end
     end
