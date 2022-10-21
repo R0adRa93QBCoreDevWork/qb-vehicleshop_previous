@@ -471,8 +471,7 @@ RegisterNetEvent('qb-vehicleshop:client:TestDriveReturn', function()
 end)
 
 RegisterNetEvent('qb-vehicleshop:client:vehCategories', function()
-    local catlist = {}
-    catlist = {
+    local catlist = {
         ["compacts"] = "Compacts",
         ["sedans"] = "Sedans",
         ["suvs"] = "SUVs",
@@ -558,7 +557,7 @@ RegisterNetEvent('qb-vehicleshop:client:openVehCats', function(data)
         }
     }
     for k, v in pairs(QBCore.Shared.Vehicles) do
-        if QBCore.Shared.Vehicles[k][categoryLabel] == data.catName then
+        if QBCore.Shared.Vehicles[k]["categoryLabel"] == data.catName then
             if type(QBCore.Shared.Vehicles[k]["shop"]) == 'table' then
                 for _, shop in pairs(QBCore.Shared.Vehicles[k]["shop"]) do
                     if shop == insideShop then
