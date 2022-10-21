@@ -299,7 +299,7 @@ local function getCategoryLabel(cat)
         ["military"] = "Military",
         ["commercial"] = "Commercial",
         ["trains"] = "Trains",
-        ["openwheel"] = "Openwheel"
+        ["openwheel"] = "Open Wheel"
     }
     if catlist[cat] then return catlist[cat]
     else
@@ -556,6 +556,7 @@ RegisterNetEvent('qb-vehicleshop:client:vehCategories', function()
 end)
 
 RegisterNetEvent('qb-vehicleshop:client:openVehCats', function(data)
+    local testcat = nil
     local vehMenu = {
         {
             header = Lang:t('menus.goback_header'),
@@ -566,7 +567,6 @@ RegisterNetEvent('qb-vehicleshop:client:openVehCats', function(data)
         }
     }
     for k, v in pairs(QBCore.Shared.Vehicles) do
-        local testcat = nil
         if v.categoryLabel then
             testcat = QBCore.Shared.Vehicles[k].categoryLabel
         else
