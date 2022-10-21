@@ -155,7 +155,6 @@ local function startTestDriveTimer(testDriveTime, prevCoords)
                 end
                 drawTxt(Lang:t('general.testdrive_timer') .. math.ceil(testDriveTime - secondsLeft / 1000), 4, 0.5, 0.93, 0.50, 255, 255, 255, 180)
             end
-            Wait(0)
         end
     end)
 end
@@ -505,12 +504,6 @@ end)
 
 RegisterNetEvent('qb-vehicleshop:client:vehCategories', function()
     local catLabel = nil
-    --[[
-    DO NOT EDIT the catlist TABLE! GO INTO THE vehicles.lua AND
-    ADD THE categoryLabel LIKE YOU ARE SUPPOSED TO!
-    DON'T GO INTO CHAT BEGGING FOR HELP IF YOU EDIT THIS!
-    --]]
-
 	local catmenu = {}
     local categoryMenu = {
         {
@@ -863,5 +856,3 @@ CreateThread(function()
         end
     end
 end)
-
---- sTEVIE WAS HERE
