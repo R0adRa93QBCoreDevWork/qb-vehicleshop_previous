@@ -471,31 +471,43 @@ RegisterNetEvent('qb-vehicleshop:client:TestDriveReturn', function()
 end)
 
 RegisterNetEvent('qb-vehicleshop:client:vehCategories', function()
-    local catlist = {
-        ["compacts"] = "Compacts",
-        ["sedans"] = "Sedans",
-        ["suvs"] = "SUVs",
-        ["coupes"] = "Coupes",
-        ["muscle"] = "Muscle",
-        ["sportsclassics"] = "Classic Sports Cars",
-        ["sports"] = "Sports Cars",
-        ["super"] = "Super Cars",
-        ["motorcycles"] = "Motorcycles",
-        ["offroad"] = "Off-Road",
-        ["industrial"] = "Industrial",
-        ["utility"] = "Utility",
-        ["vans"] = "Vans",
-        ["cycles"] = "Bicycles",
-        ["boats"] = "Boats",
-        ["helicopters"] = "Helicopters",
-        ["planes"] = "Planes",
-        ["service"] = "Service",
-        ["emergency"] = "Emergency",
-        ["military"] = "Military",
-        ["commercial"] = "Commercial",
-        ["trains"] = "Trains",
-        ["openwheel"] = "Openwheel"
-    }
+    --[[
+    DO NOT EDIT the catlist TABLE! GO INTO THE vehicles.lua AND
+    ADD THE FUCKING categoryLabel LIKE YOU ARE SUPPOSED TO!
+    DON'T GO INTO CHAT BEGGING FOR HELP IF YOU FUCKING EDIT THIS BITCH!
+    --]]
+    local function getCategoryLabel(cat)
+        local catlist = {
+            ["compacts"] = "Compacts",
+            ["sedans"] = "Sedans",
+            ["suvs"] = "SUVs",
+            ["coupes"] = "Coupes",
+            ["muscle"] = "Muscle",
+            ["sportsclassics"] = "Classic Sports Cars",
+            ["sports"] = "Sports Cars",
+            ["super"] = "Super Cars",
+            ["motorcycles"] = "Motorcycles",
+            ["offroad"] = "Off-Road",
+            ["industrial"] = "Industrial",
+            ["utility"] = "Utility",
+            ["vans"] = "Vans",
+            ["cycles"] = "Bicycles",
+            ["boats"] = "Boats",
+            ["helicopters"] = "Helicopters",
+            ["planes"] = "Planes",
+            ["service"] = "Service",
+            ["emergency"] = "Emergency",
+            ["military"] = "Military",
+            ["commercial"] = "Commercial",
+            ["trains"] = "Trains",
+            ["openwheel"] = "Openwheel"
+        }
+        if catlist[cat] then return catlist[cat]
+        else
+            return "Uncategorized"
+        end
+    end
+
 	local catmenu = {}
     local categoryMenu = {
         {
@@ -516,7 +528,7 @@ RegisterNetEvent('qb-vehicleshop:client:vehCategories', function()
                         message = '^3Warning: ["CategoryLabel"] missing in qb-core/shared/vehicles.lua under ^0' .. v.model
                         TriggerServerEvent('vehicleshop:server:alert',message)
                         QBCore.Debug(v.category)
-                        catmenu[v.categoryLabel] = catlist.cat[v.category]
+                        catmenu[v.categoryLabel] = getCategoryLabel(v.category)
                     end
                 end
             end
@@ -526,8 +538,8 @@ RegisterNetEvent('qb-vehicleshop:client:vehCategories', function()
             else
                 message = '^3Warning: ["CategoryLabel"] missing in qb-core/shared/vehicles.lua under ^0' .. v.model
                 TriggerServerEvent('vehicleshop:server:alert',message)
-                QBCore.Debug(v.category .. " " .. catlist[v.category])
-                catmenu[v.categoryLabel] = catlist[v.category]
+                QBCore.Debug(v.category .. " " .. getCategoryLabel(v.category))
+                catmenu[v.categoryLabel] = getCategoryLabel(v.category)
             end
         end
     end
