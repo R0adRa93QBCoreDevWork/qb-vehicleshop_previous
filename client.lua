@@ -275,7 +275,40 @@ local function createFreeUseShop(shopShape, name)
         end
     end)
 end
-
+local function getCategoryLabel(cat)
+    --DO NOT EDIT catlist--
+    local catlist = {
+        ["compacts"] = "Compacts",
+        ["sedans"] = "Sedans",
+        ["suvs"] = "SUVs",
+        ["coupes"] = "Coupes",
+        ["muscle"] = "Muscle",
+        ["sportsclassics"] = "Classic Sports Cars",
+        ["sports"] = "Sports Cars",
+        ["super"] = "Super Cars",
+        ["motorcycles"] = "Motorcycles",
+        ["offroad"] = "Off-Road",
+        ["industrial"] = "Industrial",
+        ["utility"] = "Utility",
+        ["vans"] = "Vans",
+        ["cycles"] = "Bicycles",
+        ["boats"] = "Boats",
+        ["helicopters"] = "Helicopters",
+        ["planes"] = "Planes",
+        ["service"] = "Service",
+        ["emergency"] = "Emergency",
+        ["military"] = "Military",
+        ["commercial"] = "Commercial",
+        ["trains"] = "Trains",
+        ["openwheel"] = "Openwheel"
+    }
+    if catlist[cat] then return catlist[cat]
+    else
+        message = '^3Warning: ["category"] = "' .. cat .. '" in vehicle.lua is mislabeled and must match vehicleClass in vehicles.meta and with fivem https://docs.fivem.net/natives/?_0x29439776AAA00A62^0'
+        TriggerServerEvent('vehicleshop:server:alert',message)
+        return cat
+    end
+end
 local function createManagedShop(shopShape, name)
     local zone = PolyZone:Create(shopShape, {
         name = name,
@@ -471,42 +504,12 @@ RegisterNetEvent('qb-vehicleshop:client:TestDriveReturn', function()
 end)
 
 RegisterNetEvent('qb-vehicleshop:client:vehCategories', function()
+    local catLabel = nil
     --[[
     DO NOT EDIT the catlist TABLE! GO INTO THE vehicles.lua AND
-    ADD THE FUCKING categoryLabel LIKE YOU ARE SUPPOSED TO!
-    DON'T GO INTO CHAT BEGGING FOR HELP IF YOU FUCKING EDIT THIS BITCH!
+    ADD THE categoryLabel LIKE YOU ARE SUPPOSED TO!
+    DON'T GO INTO CHAT BEGGING FOR HELP IF YOU EDIT THIS!
     --]]
-    local function getCategoryLabel(cat)
-        local catlist = {
-            ["compacts"] = "Compacts",
-            ["sedans"] = "Sedans",
-            ["suvs"] = "SUVs",
-            ["coupes"] = "Coupes",
-            ["muscle"] = "Muscle",
-            ["sportsclassics"] = "Classic Sports Cars",
-            ["sports"] = "Sports Cars",
-            ["super"] = "Super Cars",
-            ["motorcycles"] = "Motorcycles",
-            ["offroad"] = "Off-Road",
-            ["industrial"] = "Industrial",
-            ["utility"] = "Utility",
-            ["vans"] = "Vans",
-            ["cycles"] = "Bicycles",
-            ["boats"] = "Boats",
-            ["helicopters"] = "Helicopters",
-            ["planes"] = "Planes",
-            ["service"] = "Service",
-            ["emergency"] = "Emergency",
-            ["military"] = "Military",
-            ["commercial"] = "Commercial",
-            ["trains"] = "Trains",
-            ["openwheel"] = "Openwheel"
-        }
-        if catlist[cat] then return catlist[cat]
-        else
-            return "Uncategorized"
-        end
-    end
 
 	local catmenu = {}
     local categoryMenu = {
@@ -527,8 +530,8 @@ RegisterNetEvent('qb-vehicleshop:client:vehCategories', function()
                     else
                         message = '^3Warning: ["CategoryLabel"] missing in qb-core/shared/vehicles.lua under ^0' .. v.model
                         TriggerServerEvent('vehicleshop:server:alert',message)
-                        QBCore.Debug(v.category)
-                        catmenu[v.categoryLabel] = getCategoryLabel(v.category)
+                        catLabel = getCategoryLabel(v.category)
+                        catmenu[catLabel] = catLabel
                     end
                 end
             end
@@ -538,8 +541,9 @@ RegisterNetEvent('qb-vehicleshop:client:vehCategories', function()
             else
                 message = '^3Warning: ["CategoryLabel"] missing in qb-core/shared/vehicles.lua under ^0' .. v.model
                 TriggerServerEvent('vehicleshop:server:alert',message)
-                QBCore.Debug(v.category .. " " .. getCategoryLabel(v.category))
-                catmenu[v.categoryLabel] = getCategoryLabel(v.category)
+                catLabel = getCategoryLabel(v.category)
+                catmenu[catLabel] = catLabel
+                catmenu[v.category] = v.category
             end
         end
     end
@@ -569,7 +573,13 @@ RegisterNetEvent('qb-vehicleshop:client:openVehCats', function(data)
         }
     }
     for k, v in pairs(QBCore.Shared.Vehicles) do
-        if QBCore.Shared.Vehicles[k]["categoryLabel"] == data.catName then
+        local testcat = nil
+        if v.categoryLabel then
+            testcat = QBCore.Shared.Vehicles[k].categoryLabel
+        else
+            testcat = getCategoryLabel(QBCore.Shared.Vehicles[k].category)
+        end
+        if testcat == data.catName then
             if type(QBCore.Shared.Vehicles[k]["shop"]) == 'table' then
                 for _, shop in pairs(QBCore.Shared.Vehicles[k]["shop"]) do
                     if shop == insideShop then
@@ -853,3 +863,5 @@ CreateThread(function()
         end
     end
 end)
+
+--- sTEVIE WAS HERE
