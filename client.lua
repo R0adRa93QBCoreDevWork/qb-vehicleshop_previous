@@ -503,7 +503,7 @@ RegisterNetEvent('qb-vehicleshop:client:TestDriveReturn', function()
 end)
 
 RegisterNetEvent('qb-vehicleshop:client:vehCategories', function()
-    local catLabel = nil
+    local catLabel
 	local catmenu = {}
     local categoryMenu = {
         {
@@ -556,7 +556,7 @@ RegisterNetEvent('qb-vehicleshop:client:vehCategories', function()
 end)
 
 RegisterNetEvent('qb-vehicleshop:client:openVehCats', function(data)
-    local testcat = nil
+    local testcat
     local vehMenu = {
         {
             header = Lang:t('menus.goback_header'),
