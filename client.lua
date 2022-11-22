@@ -302,12 +302,12 @@ local function getCategoryLabel(cat)
         ["trains"] = "Trains",
         ["openwheel"] = "Open Wheel"
     }
-    if catlist[cat] then return catlist[cat]
-    else
+    if not catlist[cat] then
         message = '^3Warning: ["category"] = "' .. cat .. '" in vehicle.lua is mislabeled and must match vehicleClass in vehicles.meta and with fivem https://docs.fivem.net/natives/?_0x29439776AAA00A62^0'
         TriggerServerEvent('vehicleshop:server:alert',message)
         return cat
     end
+    return catlist[cat]
 end
 local function createManagedShop(shopShape, name)
     local zone = PolyZone:Create(shopShape, {
