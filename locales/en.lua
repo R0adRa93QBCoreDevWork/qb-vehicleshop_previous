@@ -19,6 +19,7 @@ local Translations = {
         buyertoopoor = "The buyer doesn\'t have enough money",
         nofinanced = "You don't have any financed vehicles",
         financed = "This vehicle is financed",
+        vehexists = "This vehicle is already checked out."
     },
     success = {
         purchased = "Congratulations on your purchase!",

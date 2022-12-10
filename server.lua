@@ -81,6 +81,22 @@ local function GeneratePlate()
     end
 end
 
+local function JobsPlateGen(res)
+    local plate = res.platePrefix .. tostring(math.random(1000, 9999))
+    local dbRes = MySQL.scalar.await('SELECT plate FROM player_vehicles WHERE plate = ?', {plate})
+    if res.selGar == "ownGarage" then
+        if vehTrack and (vehTrack[res.plate] or DoesEntityExist(res.vehTrack[res.plate].veh)) then
+            TriggerClientEvent('QBCore:Notify', result.source, Lang:t('error.vehexists'), 'error')
+            return false
+        end
+        plate = res.plate
+    elseif res.selGar ~= "ownGarage" and dbRes and res.vehTrack and DoesEntityExist(res.vehTrack[plate].veh) then
+        return JobsPlateGen()
+    end
+    return plate:upper()
+end
+exports("JobsPlateGen",JobsPlateGen)
+
 local function comma_value(amount)
     local formatted = amount
     local k
@@ -92,6 +108,44 @@ local function comma_value(amount)
     end
     return formatted
 end
+
+-- Buy Jobs Vehicle Outright
+local function BuyJobsVehicle(res)
+    local pData = res.player
+    local PlayerJob = pData.PlayerData.job
+    local cid = pData.PlayerData.citizenid
+    local vehList = {}
+    if QBCore.Shared.Jobs[PlayerJob.name].Vehicles then vehList = QBCore.Shared.Jobs[PlayerJob.name].Vehicles
+    else vehList = exports['qb-jobs']:AddJobs() end
+    local cash = pData.PlayerData.money['cash']
+    local bank = pData.PlayerData.money['bank']
+    local vehiclePrice = vehList[res.vehicle].purchasePrice
+    local plate = JobsPlateGen(res)
+    local approved
+    if cash > tonumber(vehiclePrice) then approved = "cash"
+    elseif bank > tonumber(vehiclePrice) then approved = "bank" end
+    if approved then
+        MySQL.insert('INSERT INTO player_vehicles (license, citizenid, vehicle, hash, mods, plate, garage, state, job) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', {
+            pData.PlayerData.license,
+            cid,
+            res.vehicle,
+            GetHashKey(res.vehicle),
+            '{}',
+            plate,
+            'pillboxgarage',
+            0,
+            PlayerJob.name
+        })
+        pData.Functions.RemoveMoney(approved, vehiclePrice, 'vehicle-bought-from-job')
+        exports['qb-management']:AddMoney(PlayerJob.name, vehiclePrice)
+        TriggerClientEvent('QBCore:Notify', res.source, Lang:t('success.purchased'), 'success')
+    else
+        TriggerClientEvent('QBCore:Notify', res.source, Lang:t('error.notenoughmoney'), 'error')
+        return false
+    end
+    return true
+end
+exports("BuyJobsVehicle",BuyJobsVehicle)
 
 -- Callbacks
 QBCore.Functions.CreateCallback('qb-vehicleshop:server:getVehicles', function(source, cb)
@@ -192,15 +246,17 @@ end)
 
 -- Buy public vehicle outright
 RegisterNetEvent('qb-vehicleshop:server:buyShowroomVehicle', function(vehicle)
-    local src = source
     vehicle = vehicle.buyVehicle
-    local pData = QBCore.Functions.GetPlayer(src)
+    local pData = QBCore.Functions.GetPlayer(source)
     local cid = pData.PlayerData.citizenid
     local cash = pData.PlayerData.money['cash']
     local bank = pData.PlayerData.money['bank']
     local vehiclePrice = QBCore.Shared.Vehicles[vehicle]['price']
     local plate = GeneratePlate()
-    if cash > tonumber(vehiclePrice) then
+    local approved
+    if cash > tonumber(vehiclePrice) then approved = "cash"
+    elseif bank > tonumber(vehiclePrice) then approved = "bank" end
+    if approved then
         MySQL.insert('INSERT INTO player_vehicles (license, citizenid, vehicle, hash, mods, plate, garage, state) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', {
             pData.PlayerData.license,
             cid,
@@ -213,21 +269,7 @@ RegisterNetEvent('qb-vehicleshop:server:buyShowroomVehicle', function(vehicle)
         })
         TriggerClientEvent('QBCore:Notify', src, Lang:t('success.purchased'), 'success')
         TriggerClientEvent('qb-vehicleshop:client:buyShowroomVehicle', src, vehicle, plate)
-        pData.Functions.RemoveMoney('cash', vehiclePrice, 'vehicle-bought-in-showroom')
-    elseif bank > tonumber(vehiclePrice) then
-        MySQL.insert('INSERT INTO player_vehicles (license, citizenid, vehicle, hash, mods, plate, garage, state) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', {
-            pData.PlayerData.license,
-            cid,
-            vehicle,
-            GetHashKey(vehicle),
-            '{}',
-            plate,
-            'pillboxgarage',
-            0
-        })
-        TriggerClientEvent('QBCore:Notify', src, Lang:t('success.purchased'), 'success')
-        TriggerClientEvent('qb-vehicleshop:client:buyShowroomVehicle', src, vehicle, plate)
-        pData.Functions.RemoveMoney('bank', vehiclePrice, 'vehicle-bought-in-showroom')
+        pData.Functions.RemoveMoney(approved, vehiclePrice, 'vehicle-bought-in-showroom')
     else
         TriggerClientEvent('QBCore:Notify', src, Lang:t('error.notenoughmoney'), 'error')
     end
