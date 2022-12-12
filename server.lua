@@ -151,7 +151,6 @@ local function vehDBInsert(res)
             res.veh.jobName
         })
     end
-    QBCore.Debug(dbCheck)
     if dbCheck then return dbCheck end
     return dbCheck
 end
