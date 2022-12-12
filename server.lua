@@ -166,7 +166,7 @@ local function BuyJobsVehicle(res)
     local player = res.player
     local PlayerJob = player.PlayerData.job
     local cid = player.PlayerData.citizenid
-    local approved
+    local approved = nil
     local vehList = {}
     local data = {veh = {}}
     if QBCore.Shared.Jobs[PlayerJob.name].Vehicles then
@@ -178,8 +178,10 @@ local function BuyJobsVehicle(res)
     local bank = player.PlayerData.money['bank']
     local vehiclePrice = vehList[res.vehicle].purchasePrice
     local plate = JobsPlateGen(res)
-    if cash > tonumber(vehiclePrice) then approved = "cash"
-    elseif bank > tonumber(vehiclePrice) then approved = "bank"
+    if cash > tonumber(vehiclePrice) then
+        approved = "cash"
+    elseif bank > tonumber(vehiclePrice) then
+        approved = "bank"
     else
         TriggerClientEvent('QBCore:Notify', res.source, Lang:t('error.notenoughmoney'), 'error')
         return false
@@ -193,10 +195,12 @@ local function BuyJobsVehicle(res)
     QBCore.Debug(PlayerJob)
     local dbCheck = vehDBInsert(data)
     if dbCheck then
-        player.Functions.RemoveMoney(approved, vehiclePrice, 'vehicle-bought-from-job')
-        exports['qb-management']:AddMoney(PlayerJob.name, vehiclePrice)
-        TriggerClientEvent('QBCore:Notify', res.source, Lang:t('success.purchased'), 'success')
-        return true
+        if approved ~= nil then
+            player.Functions.RemoveMoney(approved, vehiclePrice, 'vehicle-bought-from-job')
+            exports['qb-management']:AddMoney(PlayerJob.name, vehiclePrice)
+            TriggerClientEvent('QBCore:Notify', res.source, Lang:t('success.purchased'), 'success')
+            return true
+        end
     end
 end
 exports("BuyJobsVehicle",BuyJobsVehicle)
