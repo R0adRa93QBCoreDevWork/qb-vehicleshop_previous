@@ -174,32 +174,35 @@ local function BuyJobsVehicle(res)
     else
         vehList = exports['qb-jobs']:AddJobs()
     end
-    local cash = player.PlayerData.money['cash']
-    local bank = player.PlayerData.money['bank']
-    local vehiclePrice = vehList[res.vehicle].purchasePrice
-    local plate = JobsPlateGen(res)
-    if cash > tonumber(vehiclePrice) then
-        approved = "cash"
-    elseif bank > tonumber(vehiclePrice) then
-        approved = "bank"
-    else
-        TriggerClientEvent('QBCore:Notify', res.source, Lang:t('error.notenoughmoney'), 'error')
-        return false
-    end
-    data.vehOption = "jobs"
-    data.veh.license = player.PlayerData.license
-    data.veh.cid = cid
-    data.veh.vehicle = res.vehicle
-    data.veh.plate = plate
-    data.veh.jobName = PlayerJob.name
-    QBCore.Debug(PlayerJob)
-    local dbCheck = vehDBInsert(data)
-    if dbCheck then
-        if approved then
-            player.Functions.RemoveMoney(approved, vehiclePrice, 'vehicle-bought-from-job')
-            exports['qb-management']:AddMoney(PlayerJob.name, vehiclePrice)
-            TriggerClientEvent('QBCore:Notify', res.source, Lang:t('success.purchased'), 'success')
-            return true
+    
+    if vehList then
+        local cash = player.PlayerData.money['cash']
+        local bank = player.PlayerData.money['bank']
+        local vehiclePrice = vehList[res.vehicle].purchasePrice
+        local plate = JobsPlateGen(res)
+        if cash > tonumber(vehiclePrice) then
+            approved = "cash"
+        elseif bank > tonumber(vehiclePrice) then
+            approved = "bank"
+        else
+            TriggerClientEvent('QBCore:Notify', res.source, Lang:t('error.notenoughmoney'), 'error')
+            return false
+        end
+        data.vehOption = "jobs"
+        data.veh.license = player.PlayerData.license
+        data.veh.cid = cid
+        data.veh.vehicle = res.vehicle
+        data.veh.plate = plate
+        data.veh.jobName = PlayerJob.name
+        QBCore.Debug(PlayerJob)
+        local dbCheck = vehDBInsert(data)
+        if dbCheck then
+            if approved then
+                player.Functions.RemoveMoney(approved, vehiclePrice, 'vehicle-bought-from-job')
+                exports['qb-management']:AddMoney(PlayerJob.name, vehiclePrice)
+                TriggerClientEvent('QBCore:Notify', res.source, Lang:t('success.purchased'), 'success')
+                return true
+            end
         end
     end
 end
