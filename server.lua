@@ -166,8 +166,8 @@ local function BuyJobsVehicle(res)
     local player = res.player
     local PlayerJob = player.PlayerData.job
     local cid = player.PlayerData.citizenid
-    local approved = nil
-    local vehList = {}
+    local approved
+    local vehList
     local data = {veh = {}}
     if QBCore.Shared.Jobs[PlayerJob.name].Vehicles then
         vehList = QBCore.Shared.Jobs[PlayerJob.name].Vehicles
@@ -195,7 +195,7 @@ local function BuyJobsVehicle(res)
     QBCore.Debug(PlayerJob)
     local dbCheck = vehDBInsert(data)
     if dbCheck then
-        if approved ~= nil then
+        if approved then
             player.Functions.RemoveMoney(approved, vehiclePrice, 'vehicle-bought-from-job')
             exports['qb-management']:AddMoney(PlayerJob.name, vehiclePrice)
             TriggerClientEvent('QBCore:Notify', res.source, Lang:t('success.purchased'), 'success')
