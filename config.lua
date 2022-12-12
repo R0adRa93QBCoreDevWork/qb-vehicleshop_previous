@@ -8,6 +8,7 @@ Config.PaymentInterval = 24 -- time in hours between payment being due
 Config.MinimumDown = 10 -- minimum percentage allowed down
 Config.MaximumPayments = 24 -- maximum payments allowed
 Config.PreventFinanceSelling = false -- allow/prevent players from using /transfervehicle if financed
+Config.repoDelete = true -- true = vehicles are deleted | false = the vehicle is not deleted in the database.
 Config.Shops = {
     ['pdm'] = {
         ['Type'] = 'free-use', -- no player interaction is required to purchase a car

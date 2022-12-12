@@ -112,6 +112,7 @@ end
 -- DB Insertion Function
 local function vehDBInsert(res)
     local dbCheck
+    local msg = {}
     if res.vehOption == "purchase" then
         dbCheck = MySQL.insert.await('INSERT INTO player_vehicles (license, citizenid, vehicle, hash, mods, plate, garage, state) VALUES (?,?,?,?,?,?,?,?)', {
             res.veh.license,
@@ -123,6 +124,7 @@ local function vehDBInsert(res)
             'pillboxgarage',
             0
         })
+        msg[1] = "purchased"
     elseif res.vehOption == "finance" then
         dbCheck = MySQL.insert.await('INSERT INTO player_vehicles (license, citizenid, vehicle, hash, mods, plate, garage, state, balance, paymentamount, paymentsleft, financetime) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', {
             res.veh.license,
@@ -138,6 +140,7 @@ local function vehDBInsert(res)
             res.veh.paymentAmount,
             res.veh.timer
         })
+        msg[1] = "financed"
     elseif res.vehOption == "jobs" then
         dbCheck = MySQL.insert.await('INSERT INTO player_vehicles (license, citizenid, vehicle, hash, mods, plate, garage, state, job) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', {
             res.veh.license,
@@ -150,8 +153,10 @@ local function vehDBInsert(res)
             0,
             res.veh.jobName
         })
+        msg[1] = "purchased"
     end
-    QBCore.Debug(dbCheck)
+    msg[2] = res.veh.cid .. " has " .. msg[1] .. " a " .. res.veh.vehicle .. " with plate " .. res.veh.plate
+    TriggerEvent('qb-log:server:CreateLog', 'vehicleshop', 'Vehicle '..msg[1], 'green', msg[2])
     if dbCheck then return dbCheck end
     return dbCheck
 end
@@ -472,6 +477,7 @@ end)
 RegisterNetEvent('qb-vehicleshop:server:checkFinance', function()
     local src = source
     local player = QBCore.Functions.GetPlayer(src)
+    local msg = {}
     local query = 'SELECT * FROM player_vehicles WHERE citizenid = ? AND balance > 0 AND financetime < 1'
     local result = MySQL.query.await(query, {player.PlayerData.citizenid})
     if result[1] then
@@ -480,9 +486,14 @@ RegisterNetEvent('qb-vehicleshop:server:checkFinance', function()
         local vehicles = MySQL.query.await(query, {player.PlayerData.citizenid})
         for _, v in pairs(vehicles) do
             local plate = v.plate
-            MySQL.query('DELETE FROM player_vehicles WHERE plate = @plate', {['@plate'] = plate})
-            --MySQL.update('UPDATE player_vehicles SET citizenid = ? WHERE plate = ?', {'REPO-'..v.citizenid, plate}) -- Use this if you don't want them to be deleted
+            if Config.repoDelete then
+                MySQL.query('DELETE FROM player_vehicles WHERE plate = @plate', {['@plate'] = plate})
+            else
+               MySQL.update('UPDATE player_vehicles SET citizenid = ? WHERE plate = ?', {'REPO-'..v.citizenid, plate}) -- Use this if you don't want them to be deleted
+            end
             TriggerClientEvent('QBCore:Notify', src, Lang:t('error.repossessed', {plate = plate}), 'error')
+            msg[1] = "vehicle " .. v.plate .." has been reposessed for non-payment from " .. player.PlayerData.citizenid
+            TriggerEvent('qb-log:server:CreateLog', 'vehicleshop', 'Vehicle Reposessed', 'green', msg[1])
         end
     end
 end)
@@ -491,6 +502,7 @@ end)
 QBCore.Commands.Add('transfervehicle', Lang:t('general.command_transfervehicle'), {{name = 'ID', help = Lang:t('general.command_transfervehicle_help')}, {name = 'amount', help = Lang:t('general.command_transfervehicle_amount')}}, false, function(source, args)
     local src = source
     local approved
+    local msg = {}
     local buyerId = tonumber(args[1])
     local sellAmount = tonumber(args[2])
     if buyerId == 0 then return TriggerClientEvent('QBCore:Notify', src, Lang:t('error.Invalid_ID'), 'error') end
@@ -527,7 +539,9 @@ QBCore.Commands.Add('transfervehicle', Lang:t('general.command_transfervehicle')
     TriggerClientEvent('QBCore:Notify', src, Lang:t('success.soldfor') .. comma_value(sellAmount), 'success')
     TriggerClientEvent('vehiclekeys:client:SetOwner', buyerId, plate)
     TriggerClientEvent('QBCore:Notify', buyerId, Lang:t('success.boughtfor') .. comma_value(sellAmount), 'success')
+    msg[1] = player.PlayerData.citizenid .. " transferred vehicle to " .. target.PlayerData.citizenid
+    TriggerEvent('qb-log:server:CreateLog', 'vehicleshop', 'Vehicle Transferred', 'green', msg[1])
     player.Functions.AddMoney(approved, sellAmount)
     target.Functions.RemoveMoney(approved, sellAmount)
-    MySQL.update('UPDATE player_vehicles SET citizenid = ?, license = ? WHERE plate = ?', {targetcid, targetlicense, plate})
+    MySQL.update.await('UPDATE player_vehicles SET citizenid = ?, license = ? WHERE plate = ?', {targetcid, targetlicense, plate})
 end)
