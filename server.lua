@@ -85,12 +85,12 @@ local function JobsPlateGen(res)
     local plate = res.platePrefix .. tostring(math.random(1000, 9999))
     local dbRes = MySQL.scalar.await('SELECT plate FROM player_vehicles WHERE plate = ?', {plate})
     if res.selGar == "ownGarage" then
-        if res.vehTrack and (res.vehTrack[res.plate] or DoesEntityExist(res.vehTrack[res.plate].veh)) then
+        if res.vehTrack and res.vehTrack[res.plate] and DoesEntityExist(res.vehTrack[res.plate].veh) then
             TriggerClientEvent('QBCore:Notify', res.source, Lang:t('error.vehexists'), 'error')
             return false
         end
         plate = res.plate
-    elseif res.selGar ~= "ownGarage" and dbRes and res.vehTrack and DoesEntityExist(res.vehTrack[plate].veh) then
+    elseif dbRes and res.vehTrack and DoesEntityExist(res.vehTrack[plate].veh) then
         return JobsPlateGen()
     end
     return plate:upper()
