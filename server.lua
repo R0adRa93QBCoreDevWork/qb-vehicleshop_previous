@@ -162,6 +162,7 @@ local function BuyJobsVehicle(res)
     local PlayerJob = player.PlayerData.job
     local cid = player.PlayerData.citizenid
     local approved
+    local vehList = {}
     local data = {veh = {}}
     if QBCore.Shared.Jobs[PlayerJob.name].Vehicles then vehList = QBCore.Shared.Jobs[PlayerJob.name].Vehicles
     else vehList = exports['qb-jobs']:AddJobs() end
