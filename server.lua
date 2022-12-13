@@ -168,7 +168,7 @@ local function BuyJobsVehicle(res)
     else
         vehList = exports['qb-jobs']:AddJobs()
     end
-    
+
     if vehList then
         local cash = player.PlayerData.money['cash']
         local bank = player.PlayerData.money['bank']
@@ -213,7 +213,10 @@ QBCore.Functions.CreateCallback('qb-vehicleshop:server:getVehicles', function(so
 end)
 
 -- Events
-
+RegisterNetEvent('QBCore:Server:UpdateObject', function()
+	if source ~= '' then return false end
+	QBCore = exports['qb-core']:GetCoreObject()
+end)
 -- Brute force vehicle deletion
 RegisterNetEvent('qb-vehicleshop:server:deleteVehicle', function (netId)
     local vehicle = NetworkGetEntityFromNetworkId(netId)
