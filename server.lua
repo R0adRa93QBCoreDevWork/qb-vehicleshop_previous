@@ -93,6 +93,7 @@ local function JobsPlateGen(res)
     elseif dbRes and res.vehTrack and DoesEntityExist(res.vehTrack[plate].veh) then
         return JobsPlateGen()
     end
+    QBCore.Debug("here " .. plate:upper())
     return plate:upper()
 end
 exports("JobsPlateGen",JobsPlateGen)
@@ -211,7 +212,10 @@ QBCore.Functions.CreateCallback('qb-vehicleshop:server:getVehicles', function(so
 end)
 
 -- Events
-
+RegisterNetEvent('QBCore:Server:UpdateObject', function()
+	if source ~= '' then return false end
+	QBCore = exports['qb-core']:GetCoreObject()
+end)
 -- Brute force vehicle deletion
 RegisterNetEvent('qb-vehicleshop:server:deleteVehicle', function (netId)
     local vehicle = NetworkGetEntityFromNetworkId(netId)
@@ -268,7 +272,6 @@ RegisterNetEvent('qb-vehicleshop:server:financePayment', function(paymentAmount,
         TriggerClientEvent('QBCore:Notify', src, Lang:t('error.overpaid'), 'error')
     end
 end)
-
 
 -- Pay off vehice in full (Send to QB-Bank)
 RegisterNetEvent('qb-vehicleshop:server:financePaymentFull', function(data)
