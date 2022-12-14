@@ -3,16 +3,17 @@ local QBCore = exports['qb-core']:GetCoreObject()
 local financetimer = {}
 
 -- Handlers
-RegisterNetEvent('vehicleshop:server:alert', function(message)
+RegisterServerEvent('vehicleshop:server:alert', function(message)
     print(message)
 end)
+
 -- Store game time for player when they load
-RegisterNetEvent('qb-vehicleshop:server:addPlayer', function(citizenid)
+RegisterServerEvent('qb-vehicleshop:server:addPlayer', function(citizenid)
     financetimer[citizenid] = os.time()
 end)
 
 -- Deduct stored game time from player on logout
-RegisterNetEvent('qb-vehicleshop:server:removePlayer', function(citizenid)
+RegisterServerEvent('qb-vehicleshop:server:removePlayer', function(citizenid)
     if financetimer[citizenid] then
         local playTime = financetimer[citizenid]
         local financetime = MySQL.query.await('SELECT * FROM player_vehicles WHERE citizenid = ?', {citizenid})
@@ -74,18 +75,16 @@ end
 local function GeneratePlate()
     local plate = QBCore.Shared.RandomInt(1) .. QBCore.Shared.RandomStr(2) .. QBCore.Shared.RandomInt(3) .. QBCore.Shared.RandomStr(2)
     local result = MySQL.scalar.await('SELECT plate FROM player_vehicles WHERE plate = ?', {plate})
-    if result then
-        return GeneratePlate()
-    else
-        return plate:upper()
-    end
+    if result then GeneratePlate() end
+    return plate:upper()
 end
+exports("GeneratePlate",GeneratePlate)
 
 local function JobsPlateGen(res)
-    local plate = res.platePrefix .. tostring(math.random(1000, 9999))
+    local plate = res.platePrefix .. tostring(math.random(res.min, res.max))
     local dbRes = MySQL.scalar.await('SELECT plate FROM player_vehicles WHERE plate = ?', {plate})
     if res.selGar == "ownGarage" then
-        if res.vehTrack and (res.vehTrack[res.plate] or DoesEntityExist(res.vehTrack[res.plate].veh)) then
+        if res and res.vehTrack and res.vehTrack[res.plate] then
             TriggerClientEvent('QBCore:Notify', res.source, Lang:t('error.vehexists'), 'error')
             return false
         end
@@ -164,12 +163,10 @@ local function BuyJobsVehicle(res)
     local vehList
     local data = {veh = {}}
     vehList = QBCore.Shared.Jobs[PlayerJob.name].Vehicles
-
     if vehList then
         local cash = player.PlayerData.money['cash']
         local bank = player.PlayerData.money['bank']
         local vehiclePrice = vehList[res.vehicle].purchasePrice
-        local plate = JobsPlateGen(res)
         if cash > tonumber(vehiclePrice) then
             approved = "cash"
         elseif bank > tonumber(vehiclePrice) then
@@ -182,9 +179,8 @@ local function BuyJobsVehicle(res)
         data.veh.license = player.PlayerData.license
         data.veh.cid = cid
         data.veh.vehicle = res.vehicle
-        data.veh.plate = plate
         data.veh.jobName = PlayerJob.name
-        QBCore.Debug(PlayerJob)
+        data.veh.plate = res.plate
         local dbCheck = vehDBInsert(data)
         if dbCheck and approved then
             player.Functions.RemoveMoney(approved, vehiclePrice, 'vehicle-bought-from-job')
@@ -209,18 +205,18 @@ QBCore.Functions.CreateCallback('qb-vehicleshop:server:getVehicles', function(so
 end)
 
 -- Events
-RegisterNetEvent('QBCore:Server:UpdateObject', function()
+RegisterServerEvent('QBCore:Server:UpdateObject', function()
 	if source ~= '' then return false end
 	QBCore = exports['qb-core']:GetCoreObject()
 end)
 -- Brute force vehicle deletion
-RegisterNetEvent('qb-vehicleshop:server:deleteVehicle', function (netId)
+RegisterServerEvent('qb-vehicleshop:server:deleteVehicle', function (netId)
     local vehicle = NetworkGetEntityFromNetworkId(netId)
     DeleteEntity(vehicle)
 end)
 
 -- Sync vehicle for other players
-RegisterNetEvent('qb-vehicleshop:server:swapVehicle', function(data)
+RegisterServerEvent('qb-vehicleshop:server:swapVehicle', function(data)
     local src = source
     TriggerClientEvent('qb-vehicleshop:client:swapVehicle', -1, data)
     Wait(1500)-- let new car spawn
@@ -228,7 +224,7 @@ RegisterNetEvent('qb-vehicleshop:server:swapVehicle', function(data)
 end)
 
 -- Send customer for test drive
-RegisterNetEvent('qb-vehicleshop:server:customTestDrive', function(vehicle, playerid)
+RegisterServerEvent('qb-vehicleshop:server:customTestDrive', function(vehicle, playerid)
     local src = source
     local target = tonumber(playerid)
     if not QBCore.Functions.GetPlayer(target) then
@@ -243,7 +239,7 @@ RegisterNetEvent('qb-vehicleshop:server:customTestDrive', function(vehicle, play
 end)
 
 -- Make a finance payment (Send to QB-Bank)
-RegisterNetEvent('qb-vehicleshop:server:financePayment', function(paymentAmount, vehData)
+RegisterServerEvent('qb-vehicleshop:server:financePayment', function(paymentAmount, vehData)
     local src = source
     local player = QBCore.Functions.GetPlayer(src)
     local cash = player.PlayerData.money['cash']
@@ -272,7 +268,7 @@ end)
 
 
 -- Pay off vehice in full (Send to QB-Bank)
-RegisterNetEvent('qb-vehicleshop:server:financePaymentFull', function(data)
+RegisterServerEvent('qb-vehicleshop:server:financePaymentFull', function(data)
     local src = source
     local player = QBCore.Functions.GetPlayer(src)
     local cash = player.PlayerData.money['cash']
@@ -296,7 +292,7 @@ RegisterNetEvent('qb-vehicleshop:server:financePaymentFull', function(data)
 end)
 
 -- Buy public vehicle outright
-RegisterNetEvent('qb-vehicleshop:server:buyShowroomVehicle', function(vehicle)
+RegisterServerEvent('qb-vehicleshop:server:buyShowroomVehicle', function(vehicle)
     local src = source
     vehicle = vehicle.buyVehicle
     local player = QBCore.Functions.GetPlayer(src)
@@ -331,7 +327,7 @@ RegisterNetEvent('qb-vehicleshop:server:buyShowroomVehicle', function(vehicle)
 end)
 
 -- Finance public vehicle (Send to QB-Bank)
-RegisterNetEvent('qb-vehicleshop:server:financeVehicle', function(downPayment, paymentAmount, vehicle)
+RegisterServerEvent('qb-vehicleshop:server:financeVehicle', function(downPayment, paymentAmount, vehicle)
     local src = source
     downPayment = tonumber(downPayment)
     paymentAmount = tonumber(paymentAmount)
@@ -373,7 +369,7 @@ RegisterNetEvent('qb-vehicleshop:server:financeVehicle', function(downPayment, p
 end)
 
 -- Sell vehicle to customer
-RegisterNetEvent('qb-vehicleshop:server:sellShowroomVehicle', function(vehicle, playerid)
+RegisterServerEvent('qb-vehicleshop:server:sellShowroomVehicle', function(vehicle, playerid)
     local src = source
     local player = QBCore.Functions.GetPlayer(src)
     local target = QBCore.Functions.GetPlayer(tonumber(playerid))
@@ -417,7 +413,7 @@ RegisterNetEvent('qb-vehicleshop:server:sellShowroomVehicle', function(vehicle, 
 end)
 
 -- Finance vehicle to customer (Send to QB-Bank)
-RegisterNetEvent('qb-vehicleshop:server:sellfinanceVehicle', function(downPayment, paymentAmount, vehicle, playerid)
+RegisterServerEvent('qb-vehicleshop:server:sellfinanceVehicle', function(downPayment, paymentAmount, vehicle, playerid)
     local src = source
     local player = QBCore.Functions.GetPlayer(src)
     local target = QBCore.Functions.GetPlayer(tonumber(playerid))
@@ -475,7 +471,7 @@ RegisterNetEvent('qb-vehicleshop:server:sellfinanceVehicle', function(downPaymen
 end)
 
 -- Check if payment is due (Send to QB-Bank)
-RegisterNetEvent('qb-vehicleshop:server:checkFinance', function()
+RegisterServerEvent('qb-vehicleshop:server:checkFinance', function()
     local src = source
     local player = QBCore.Functions.GetPlayer(src)
     local query = 'SELECT * FROM player_vehicles WHERE citizenid = ? AND balance > 0 AND financetime < 1'
