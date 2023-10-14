@@ -205,7 +205,7 @@ local function createVehZones(shopName, entity)
 end
 
 -- Zones
-function createFreeUseShop(shopShape, name)
+local function createFreeUseShop(shopShape, name)
     local zone = PolyZone:Create(shopShape, {
         name = name,
         minZ = shopShape.minZ,
@@ -275,7 +275,7 @@ function createFreeUseShop(shopShape, name)
     end)
 end
 
-function createManagedShop(shopShape, name)
+local function createManagedShop(shopShape, name)
     local zone = PolyZone:Create(shopShape, {
         name = name,
         minZ = shopShape.minZ,
@@ -470,7 +470,7 @@ RegisterNetEvent('qb-vehicleshop:client:TestDriveReturn', function()
 end)
 
 RegisterNetEvent('qb-vehicleshop:client:vehCategories', function()
-	local catmenu = {}
+    local catmenu = {}
     local categoryMenu = {
         {
             header = Lang:t('menus.goback_header'),
@@ -480,15 +480,23 @@ RegisterNetEvent('qb-vehicleshop:client:vehCategories', function()
             }
         }
     }
-	for k, v in pairs(QBCore.Shared.Vehicles) do
+    for k, v in pairs(QBCore.Shared.Vehicles) do
         if type(QBCore.Shared.Vehicles[k]["shop"]) == 'table' then
             for _, shop in pairs(QBCore.Shared.Vehicles[k]["shop"]) do
                 if shop == insideShop then
-                    catmenu[v.category] = v.category
+                    if v.categoryLabel and (catmenu[v.category] == v.category or not catmenu[v.category]) then
+                        catmenu[v.category] = v.categoryLabel
+                    else
+                        catmenu[v.category] = v.category
+                    end
                 end
             end
         elseif QBCore.Shared.Vehicles[k]["shop"] == insideShop then
+            if v.categoryLabel and (catmenu[v.category] == v.category or not catmenu[v.category]) then
+                catmenu[v.category] = v.categoryLabel
+            else
                 catmenu[v.category] = v.category
+            end
         end
     end
     for k, v in pairs(catmenu) do
@@ -517,6 +525,7 @@ RegisterNetEvent('qb-vehicleshop:client:openVehCats', function(data)
         }
     }
     for k, v in pairs(QBCore.Shared.Vehicles) do
+        
         if QBCore.Shared.Vehicles[k]["category"] == data.catName then
             if type(QBCore.Shared.Vehicles[k]["shop"]) == 'table' then
                 for _, shop in pairs(QBCore.Shared.Vehicles[k]["shop"]) do
